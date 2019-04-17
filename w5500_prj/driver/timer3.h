@@ -10,5 +10,7 @@ extern void TIM3_Init(u16 arr,u16 psc);
 
 extern unsigned int get_sys_time(void);
 
+extern void delay_ms(int val);
+
 #endif
 

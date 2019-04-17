@@ -5,6 +5,53 @@
 SPI_HandleTypeDef SPI2_Handler;  //SPI句柄
 
 
+//外部中断初始化
+void w5500_interrupt_line(void)
+{
+    GPIO_InitTypeDef GPIO_Initure;
+    
+    __HAL_RCC_GPIOI_CLK_ENABLE();               //开启GPIOI时钟
+ 
+    
+    GPIO_Initure.Pin=GPIO_PIN_11;               //PI11
+    GPIO_Initure.Mode=GPIO_MODE_IT_FALLING;     //下降沿触发
+    GPIO_Initure.Pull=GPIO_PULLUP;
+    HAL_GPIO_Init(GPIOI,&GPIO_Initure);
+    
+    //中断线11-PI11
+    HAL_NVIC_SetPriority(EXTI15_10_IRQn,2,3);   //抢占优先级为2，子优先级为3
+    HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);         //使能中断线13  
+}
+
+void EXTI15_10_IRQHandler(void)
+{
+    HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_11);	//调用中断处理公用函数
+}
+
+static unsigned char w5500_interrupt = 0;
+
+void w5500_set_interrupt_flag(unsigned char value)
+{
+	w5500_interrupt = value;
+}
+
+unsigned char w5500_get_interrupt_flag(void)
+{
+	return w5500_interrupt;
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+		printf("...........\r\n");
+    switch(GPIO_Pin)
+    {
+			case GPIO_PIN_11:
+				w5500_interrupt = 1;
+				printf("interrupt...\r\n");
+			break;
+    }
+}
+
 
 //以下是SPI模块的初始化代码，配置成主机模式 						  
 //SPI口初始化
